@@ -21,7 +21,10 @@ RUN wget "http://nginx.org/download/nginx-1.20.0.tar.gz" \
     && rm -rf /var/lib/apt/lists/*
 RUN rm /etc/nginx/nginx.conf
 
-RUN echo "http {"> /etc/nginx/nginx.conf && \
+RUN echo "events {"> /etc/nginx/nginx.conf && \
+    echo " worker_connections 1024;">> /etc/nginx/nginx.conf && \
+    echo "}">> /etc/nginx/nginx.conf && \
+    echo "http {">> /etc/nginx/nginx.conf && \
     echo "server {" >> /etc/nginx/nginx.conf && \
     echo "    listen 80;" >> /etc/nginx/nginx.conf && \
     echo "    server_name 5.189.167.148;" >> /etc/nginx/nginx.conf && \

@@ -61,7 +61,7 @@ RUN git clone https://github.com/php/php-src.git .\
 #fucking around with php.ini
 #OLD SHIT: COPY php.ini  /opt/php/php8/lib/php.ini
 RUN cp php.ini-production /opt/php/php8/lib/php.ini \
-    #&& sed -i '/;extension=xsl/a zend_extension=opcache' filename /opt/php/php8/lib/php.ini \
+    && sed '/;extension=xsl/a zend_extension=opcache' filename /opt/php/php8/lib/php.ini \
     && echo "zend_extension=/opt/php/php8/lib/php/extensions/no-debug-non-zts-20201009/opcache.so" >> /opt/php/php8/lib/php.ini \
     && echo "opcache.enable = 1" >> /opt/php/php8/lib/php.ini \
     && echo "opcache.enable_cli = 1" >> /opt/php/php8/lib/php.ini \
