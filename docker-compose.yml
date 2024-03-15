@@ -1,0 +1,43 @@
+version: '3'
+services:
+   mysql:
+        image: mysql:5.7
+        volumes:
+          - shvolume:/data/mysql
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: turnm30ff
+            MYSQL_DATABASE: wordpress
+   nginx:
+        build:
+          context: .
+          dockerfile: nginx.dockerfile
+        depends_on:
+          - mysql
+        ports: 
+          - "8080:80"
+        volumes:
+          - shvolume:/data/web
+   php:
+      build:
+        context: .
+        dockerfile: php.dockerfile
+      volumes:
+          - shvolume:/data/web
+   wordpress:
+      depends_on:
+        - mysql
+        - nginx
+        - php
+      image: wordpress:latest
+      volumes:
+        - shvolume:/data/web
+      restart: always
+      environment:
+           WORDPRESS_DB_HOST: mysql:3306
+           WORDPRESS_DB_USER: root
+           WORDPRESS_DB_PASSWORD: turnm30ff
+           WORDPRESS_DB_NAME: wordpress
+volumes:
+  shvolume: {}
+
