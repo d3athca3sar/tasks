@@ -14,6 +14,7 @@ services:
           dockerfile: nginx.dockerfile
         depends_on:
           - mysql
+          - wordpress
         ports: 
           - "8080:80"
         volumes:
@@ -25,9 +26,10 @@ services:
       volumes:
           - shvolume:/data/web
    wordpress:
+      expose: 
+        - "80"
       depends_on:
         - mysql
-        - nginx
         - php
       image: wordpress:latest
       volumes:

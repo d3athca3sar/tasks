@@ -22,7 +22,8 @@ RUN apt update && apt-get install -y \
     libzip-dev \
     git \
     gcc \
-    make
+    make \
+    && apt-get clean
    
 WORKDIR /usr/bin/php/src
 RUN cd /usr/bin/php/src \
@@ -37,4 +38,5 @@ RUN cd /usr/bin/php/src \
         --with-zlib \
     && make && make install \
     && rm -rf /var/lib/apt/lists/* \
-    #&& rm -rf /usr/bin/php/src/php-src/*
+    && rm -rf /usr/bin/php/src/php-src/*
+CMD ["php-fpm"]
