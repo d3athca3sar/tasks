@@ -89,4 +89,4 @@ RUN chmod +x /etc/init.d/php-8-fpm \
     && echo "pm.start_servers = 2" >> /opt/php/php8/etc/php-fpm.conf \
     && echo "pm.min_spare_servers = 2" >> /opt/php/php8/etc/php-fpm.conf \
     && echo "pm.max_spare_servers = 4" >> /opt/php/php8/etc/php-fpm.conf
-CMD ["/etc/init.d/php-8-fpm", "start"]
+CMD ["/opt/php/php8/sbin/php-fpm", "-F"]

@@ -16,7 +16,7 @@ services:
           - mysql
           - wordpress
         ports: 
-          - "8080:80"
+          - "8080:8080"
         volumes:
           - shvolume:/data/web
    php:
@@ -26,8 +26,8 @@ services:
       volumes:
           - shvolume:/data/web
    wordpress:
-      expose: 
-        - "80"
+      ports: 
+        - "80:80"
       depends_on:
         - mysql
         - php
