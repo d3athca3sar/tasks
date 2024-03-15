@@ -30,6 +30,7 @@ RUN apt update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /usr/bin/php/src
 #Clone that fucking php sourcecode.
+FROM build-php AS GitClone
 RUN git clone https://github.com/php/php-src.git .\
     && ./buildconf \
     && ./configure \
@@ -60,6 +61,7 @@ RUN git clone https://github.com/php/php-src.git .\
 
 #fucking around with php.ini
 #OLD SHIT: COPY php.ini  /opt/php/php8/lib/php.ini
+FROM GitClone as phpconfig
 RUN cp php.ini-production /opt/php/php8/lib/php.ini \
     #&& sed -i '/;extension=xsl/a zend_extension=opcache' filename /opt/php/php8/lib/php.ini \
     && echo "zend_extension=/opt/php/php8/lib/php/extensions/no-debug-non-zts-20201009/opcache.so" >> /opt/php/php8/lib/php.ini \
@@ -75,6 +77,7 @@ RUN cp php.ini-production /opt/php/php8/lib/php.ini \
     && echo "opcache.enable_file_override = 1" >> /opt/php/php8/lib/php.ini 
 #fucking around with init.d and config
 COPY php-8-fpm /etc/init.d/php-8-fpm
+FROM phpconfig as phpconfig2
 RUN chmod +x /etc/init.d/php-8-fpm \
     && update-rc.d php-8-fpm defaults \
     && cp /opt/php/php8/etc/php-fpm.conf.default /opt/php/php8/etc/php-fpm.conf \
@@ -83,7 +86,7 @@ RUN chmod +x /etc/init.d/php-8-fpm \
     && echo "[www]" >> /opt/php/php8/etc/php-fpm.conf \
     && echo "user = www-data" >> /opt/php/php8/etc/php-fpm.conf \
     && echo "group = www-data" >> /opt/php/php8/etc/php-fpm.conf \
-    && echo "listen = 0.0.0.1:8999" >> /opt/php/php8/etc/php-fpm.conf \
+    && echo "listen = php:8999" >> /opt/php/php8/etc/php-fpm.conf \
     && echo "pm = dynamic" >> /opt/php/php8/etc/php-fpm.conf \
     && echo "pm.max_children = 10" >> /opt/php/php8/etc/php-fpm.conf \
     && echo "pm.start_servers = 2" >> /opt/php/php8/etc/php-fpm.conf \
