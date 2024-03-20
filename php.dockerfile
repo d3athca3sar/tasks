@@ -1,5 +1,5 @@
 FROM debian:buster-slim AS build-php
-#packages (not even sure if we need all of these)
+#packages
 RUN apt update && apt-get install -y \
     autoconf \
     re2c \
@@ -28,9 +28,9 @@ RUN apt update && apt-get install -y \
     make \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+#Clone php sourcecode.
+FROM build-php AS gitclone
 WORKDIR /usr/bin/php/src
-#Clone that fucking php sourcecode.
-FROM build-php AS GitClone
 RUN git clone https://github.com/php/php-src.git .\
     && ./buildconf \
     && ./configure \
@@ -59,37 +59,38 @@ RUN git clone https://github.com/php/php-src.git .\
 #[Remove the source files  (Will make you cry while waiting for this to complete again)]    
     #&& rm -rf /usr/bin/php/src/php-src/* \
 
-#fucking around with php.ini
-#OLD SHIT: COPY php.ini  /opt/php/php8/lib/php.ini
-FROM GitClone as phpconfig
+#editing php.ini
+FROM gitclone as phpconfig
 RUN cp php.ini-production /opt/php/php8/lib/php.ini \
-    #&& sed -i '/;extension=xsl/a zend_extension=opcache' filename /opt/php/php8/lib/php.ini \
-    && echo "zend_extension=/opt/php/php8/lib/php/extensions/no-debug-non-zts-20201009/opcache.so" >> /opt/php/php8/lib/php.ini \
-    && echo "opcache.enable = 1" >> /opt/php/php8/lib/php.ini \
-    && echo "opcache.enable_cli = 1" >> /opt/php/php8/lib/php.ini \
-    && echo "opcache.memory_consumption = 128" >> /opt/php/php8/lib/php.ini \
-    && echo "opcache.interned_strings_buffer = 8" >> /opt/php/php8/lib/php.ini \
-    && echo "opcache.max_accelerated_files = 10000" >> /opt/php/php8/lib/php.ini \
-    && echo "opcache.use_cwd = 0" >> /opt/php/php8/lib/php.ini \
-    && echo "opcache.validate_timestamps = 0" >> /opt/php/php8/lib/php.ini \
-    && echo "opcache.save_comments = 0" >> /opt/php/php8/lib/php.ini \
-    && echo "opcache.load_comments = 0" >> /opt/php/php8/lib/php.ini \
-    && echo "opcache.enable_file_override = 1" >> /opt/php/php8/lib/php.ini 
-#fucking around with init.d and config
+    && tee -a /opt/php/php8/lib/php.ini <<EOF
+    zend_extension=/opt/php/php8/lib/php/extensions/no-debug-non-zts-20201009/opcache.so 
+    opcache.enable = 1 
+    opcache.enable_cli = 1 
+    opcache.memory_consumption = 128 
+    opcache.interned_strings_buffer = 8 
+    opcache.max_accelerated_files = 10000 
+    opcache.use_cwd = 0 
+    opcache.validate_timestamps = 0 
+    opcache.save_comments = 0 
+    opcache.load_comments = 0 
+    opcache.enable_file_override = 1
+EOF
 COPY php-8-fpm /etc/init.d/php-8-fpm
+#Editing the php-fpm.conf
 FROM phpconfig as phpconfig2
 RUN chmod +x /etc/init.d/php-8-fpm \
     && update-rc.d php-8-fpm defaults \
     && cp /opt/php/php8/etc/php-fpm.conf.default /opt/php/php8/etc/php-fpm.conf \
-    #&& echo ";include=/opt/php/php8/etc/php-fpm.d/*.conf" >>/opt/php/php8/etc/php-fpm.conf \
-    && echo "pid = run/php-fpm.pid" >> /opt/php/php8/etc/php-fpm.conf \
-    && echo "[www]" >> /opt/php/php8/etc/php-fpm.conf \
-    && echo "user = www-data" >> /opt/php/php8/etc/php-fpm.conf \
-    && echo "group = www-data" >> /opt/php/php8/etc/php-fpm.conf \
-    && echo "listen = php:8999" >> /opt/php/php8/etc/php-fpm.conf \
-    && echo "pm = dynamic" >> /opt/php/php8/etc/php-fpm.conf \
-    && echo "pm.max_children = 10" >> /opt/php/php8/etc/php-fpm.conf \
-    && echo "pm.start_servers = 2" >> /opt/php/php8/etc/php-fpm.conf \
-    && echo "pm.min_spare_servers = 2" >> /opt/php/php8/etc/php-fpm.conf \
-    && echo "pm.max_spare_servers = 4" >> /opt/php/php8/etc/php-fpm.conf
+    && tee -a /opt/php/php8/etc/php-fpm.conf <<EOF
+	pid = run/php-fpm.pid
+	[www]
+    user = www-data
+    group = www-data
+    listen = php:8999
+    pm = dynamic
+    pm.max_children = 10
+    pm.start_servers = 2
+    pm.min_spare_servers = 2
+    pm.max_spare_servers = 4
+EOF
 CMD ["/opt/php/php8/sbin/php-fpm", "-F"]
