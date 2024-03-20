@@ -12,26 +12,26 @@ services:
     build:
       context: .
       dockerfile: nginx.dockerfile
-      depends_on:
-        - mysql
-        - wordpress
-      ports: 
-          - "8080:8080"
+    depends_on:
+      - mysql
+      - wordpress
+    ports:
+      - "8080:8080"
     volumes:
-          - shvolume:/data/web
+      - shvolume:/data/web
   php:
     build:
       context: .
       dockerfile: php.dockerfile
     volumes:
-      - shvolume:/data/web
+      - shvolume:/data/web 
   wordpress:
-    ports: 
-      - "80:80"
+    image: wordpress:latest
     depends_on:
       - mysql
       - php
-    image: wordpress:latest
+    ports: 
+      - "80:80"
     volumes:
       - shvolume:/data/web
     restart: always
