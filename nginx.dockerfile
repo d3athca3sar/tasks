@@ -27,7 +27,7 @@ RUN echo "events {"> /etc/nginx/nginx.conf && \
     echo "http {">> /etc/nginx/nginx.conf && \
     echo "server {" >> /etc/nginx/nginx.conf && \
     echo "    listen 80;" >> /etc/nginx/nginx.conf && \
-    echo "    server_name 5.189.167.148;" >> /etc/nginx/nginx.conf && \
+    echo "    server_name dockerWP;" >> /etc/nginx/nginx.conf && \
     echo "    location / {" >> /etc/nginx/nginx.conf && \
     echo "        proxy_pass http://wordpress:80;" >> /etc/nginx/nginx.conf && \
     echo "        proxy_set_header Host \$host;" >> /etc/nginx/nginx.conf && \
